@@ -1,0 +1,1462 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F4E3D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="保客填表">
+<title>保客填表</title>
+<style>
+:root{
+  --bg:#F6F1E7; --card:#FFFDF8; --ink:#1E2A24; --muted:#6B746E; --line:#E3DCCD;
+  --green:#1F4E3D; --green-2:#2F6B54; --green-soft:#E6EFE9;
+  --err:#B3261E; --err-soft:#FBE9E7; --warn:#9A6200; --warn-soft:#FFF3DC; --info:#2D5B86; --info-soft:#E8F0F8;
+}
+:root{color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 18px;background:var(--green);color:#fff}
+header h1{font-size:18px;margin:0 12px 0 0;font-weight:600;letter-spacing:.5px}
+header .sub{font-size:12px;opacity:.75;margin-right:auto}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--green-2)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:var(--green-2)}
+.btn.danger{color:var(--err)}
+.btn.small{padding:4px 9px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+header .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
+header .btn:hover{background:rgba(255,255,255,.2)}
+header .btn.light{background:#F6F1E7;color:var(--green);border-color:#F6F1E7;font-weight:600}
+main{display:grid;grid-template-columns:270px minmax(0,1fr) 340px;height:calc(100vh - 58px)}
+aside,section,#checks{overflow:auto}
+aside{border-right:1px solid var(--line);padding:12px}
+#checks{border-left:1px solid var(--line);padding:14px;background:#FBF8F1}
+section{padding:16px 22px 80px}
+.search{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);margin-bottom:8px}
+.filters{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.filters button{font-size:12px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.filters button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.item{padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-bottom:4px}
+.item:hover{background:var(--card)}
+.item.sel{background:var(--card);border-color:var(--green-2)}
+.item .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .m{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.badge{font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600}
+.b-err{background:var(--err-soft);color:var(--err)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-ok{background:var(--green-soft);color:var(--green)}
+.count{font-size:12px;color:var(--muted);margin:2px 2px 8px}
+.empty{color:var(--muted);text-align:center;padding:60px 20px}
+.empty h2{color:var(--green);font-weight:600}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;position:sticky;top:-16px;background:var(--bg);padding:10px 0;z-index:2;border-bottom:1px solid var(--line)}
+.bar h2{margin:0 auto 0 0;font-size:18px;color:var(--green)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:14px;color:var(--green);display:flex;align-items:center;gap:8px}
+.card h3 .sp{margin-left:auto;display:flex;gap:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px 12px}
+.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+.f input,.f select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.f input:focus,.f select:focus{outline:2px solid var(--green-2);outline-offset:-1px;border-color:transparent}
+.f.wide{grid-column:span 2}
+.hint{font-size:11px;color:var(--green-2);min-height:14px}
+.total{font-weight:600}
+.total.ok{color:var(--green)}.total.bad{color:var(--err)}
+#checks h3{margin:4px 0 8px;font-size:14px;color:var(--green)}
+.ck{border-radius:8px;padding:7px 9px;margin-bottom:6px;font-size:12.5px}
+.ck b{display:block;font-size:11px;letter-spacing:.3px}
+.ck.ERROR{background:var(--err-soft);color:var(--err)}.ck.WARNING{background:var(--warn-soft);color:var(--warn)}.ck.INFO{background:var(--info-soft);color:var(--info)}
+.ok-box{background:var(--green-soft);color:var(--green);border-radius:8px;padding:10px;font-weight:600;margin-bottom:10px}
+.manual{font-size:12px;color:var(--muted);padding-left:18px}
+.modal{position:fixed;inset:0;background:rgba(20,30,25,.45);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.open{display:flex}
+.dlg{background:var(--card);border-radius:14px;padding:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.dlg.big{max-width:1000px;height:92vh;display:flex;flex-direction:column}
+.dlg h3{margin:0 0 12px;color:var(--green)}
+.dlg iframe{flex:1;border:1px solid var(--line);border-radius:8px;width:100%}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:30;max-width:90vw;white-space:pre-line}
+pre.log{background:#F3EEE3;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;max-height:300px;overflow:auto}
+.captab{width:100%;border-collapse:collapse;font-size:13px}
+.captab th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:4px}
+.captab td{padding:3px 4px;border-top:1px solid var(--line);vertical-align:middle}
+.captab td:nth-child(2){white-space:nowrap;color:var(--muted)}
+.captab input[type=text]{width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:6px}
+.captab tr.miss td:nth-child(2){color:#B9B2A3}
+.chk{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:13px}
+#printArea{display:none}
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  #printArea img{display:block;width:210mm;height:296.5mm;page-break-after:always;break-after:page}
+}
+#pvPages{flex:1;overflow:auto;background:#E9E4D8;border-radius:8px;padding:8px}
+#pvPages img{display:block;width:100%;max-width:820px;margin:0 auto 8px;box-shadow:0 1px 4px rgba(0,0,0,.15);background:#fff}
+#tabs{display:none}
+body.hosted .pr{display:none!important}
+header .btns{display:contents}
+@media (max-width:1100px){main{grid-template-columns:230px minmax(0,1fr)}#checks{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}main{height:auto}}
+/* ---- phone: one screen at a time, bottom tab bar */
+@media (max-width:760px){
+  header{padding:10px 12px 8px;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--green)}
+  header h1{width:100%;margin:0;font-size:17px}
+  header .sub{display:none}
+  header .btns{display:flex;gap:6px;overflow-x:auto;width:100%;padding-bottom:2px;scrollbar-width:none}
+  header .btns::-webkit-scrollbar{display:none}
+  main{display:block;height:auto;padding-bottom:70px}
+  aside,section,#checks{display:none;border:0;overflow:visible;padding:12px 14px}
+  body[data-tab="list"] aside,body[data-tab="edit"] section,body[data-tab="check"] #checks{display:block}
+  #checks{background:transparent}
+  .bar{top:var(--hh,96px);margin:0 -14px 12px;padding:8px 14px}
+  .bar h2{width:100%;font-size:16px}
+  .bar .btn{flex:1;padding:9px 6px}
+  .grid{grid-template-columns:1fr}
+  .f.wide{grid-column:auto}
+  .f input,.f select,.search,.captab input[type=text]{font-size:16px;padding:9px 10px}
+  .item{padding:12px;background:var(--card);border-color:var(--line)}
+  .card{padding:12px}
+  .card h3{flex-wrap:wrap}
+  .card h3 .sp{margin-left:0;width:100%;flex-wrap:wrap}
+  .modal{padding:0}
+  .dlg,.dlg.big{max-width:none;width:100%;height:100%;max-height:none;border-radius:0;display:flex;flex-direction:column}
+  .dlg>.row{margin-top:auto;padding-top:12px}
+  .dlg .row .btn{flex:1;padding:11px}
+  .captab td:nth-child(2){white-space:normal;font-size:12px}
+  #tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  #tabs button{flex:1;border:0;background:none;padding:10px 0 9px;font-size:13px;color:var(--muted);position:relative}
+  #tabs button.on{color:var(--green);font-weight:600;box-shadow:inset 0 3px 0 var(--green)}
+  #tabs .dot{position:absolute;top:5px;margin-left:4px;font-size:10px;background:var(--err);color:#fff;border-radius:9px;padding:0 5px}
+  #toast{bottom:76px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>保客填表</h1>
+  <span class="sub">Great Eastern 提名 / 受托人表格 NBZ-FNOMI-V07-082025 · 资料只存在本电脑</span>
+  <div class="btns">
+  <button class="btn light" id="bPolicy">📄 上传保单（抓资料）</button>
+  <button class="btn" id="bNew">＋ 新增保客</button>
+  <button class="btn" id="bUpload">⇪ 批量上传 Excel/CSV</button>
+  <button class="btn" id="bTemplate">下载批量模板</button>
+  <button class="btn" id="bZip">导出全部 PDF (ZIP)</button>
+  <button class="btn pr" id="bPrintAll">🖨 打印全部</button>
+  <button class="btn" id="bExportData">导出资料 Excel</button>
+  <button class="btn" id="bSettings">⚙ 设定</button>
+  </div>
+  <input type="file" id="file" accept=".xlsx,.xls,.csv" multiple hidden>
+  <input type="file" id="policyFile" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" multiple hidden>
+</header>
+<main>
+  <aside>
+    <input class="search" id="q" placeholder="搜索姓名 / 保单号 / IC">
+    <div class="filters" id="filters">
+      <button data-f="all" class="on">全部</button><button data-f="ok">可导出</button><button data-f="err">需要修改</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+  </aside>
+  <section id="editor"></section>
+  <div id="checks"></div>
+</main>
+
+<div class="modal" id="mSettings"><div class="dlg">
+  <h3>⚙ 设定（见证人＝代理时使用）</h3>
+  <div class="grid">
+    <div class="f wide"><label>代理姓名 Agent name</label><input id="sName"></div>
+    <div class="f"><label>IAC No（留空＝手写）</label><input id="sIac"></div>
+  </div>
+  <div class="row"><button class="btn danger" id="bClear">清除全部保客资料</button><span style="flex:1"></span>
+    <button class="btn" data-close>取消</button><button class="btn primary" id="bSaveSettings">保存</button></div>
+</div></div>
+
+<div class="modal" id="mPreview"><div class="dlg big">
+  <h3 id="pvTitle">预览</h3>
+  <div id="pvPages"></div>
+  <div class="row"><button class="btn" data-close>关闭</button><button class="btn pr" id="pvPrint">🖨 打印</button><button class="btn primary" id="pvDownload">导出 PDF</button></div>
+</div></div>
+
+<div class="modal" id="mPolicy"><div class="dlg" style="max-width:720px">
+  <h3 id="polTitle">从保单抓到的资料</h3>
+  <p class="count" id="polNote"></p>
+  <table class="captab"><thead><tr><th></th><th>栏位</th><th>抓到的值（可修改）</th></tr></thead><tbody id="polRows"></tbody></table>
+  <div id="polNoms"></div>
+  <label class="chk"><input type="checkbox" id="polAddrNom"> 受益人 1 的地址＝保单持有人地址（同住家人）</label>
+  <div class="f" style="margin-top:10px"><label for="polTarget">填入</label><select id="polTarget"></select></div>
+  <details style="margin-top:10px"><summary class="count">保单原文（抓不到的可以从这里复制）</summary><pre class="log" id="polRaw"></pre></details>
+  <div class="row"><button class="btn" data-close>取消</button><button class="btn primary" id="polApply">套用</button></div>
+</div></div>
+
+<div class="modal" id="mAsk"><div class="dlg" style="max-width:420px;height:auto">
+  <h3 id="askTitle"></h3>
+  <p id="askMsg" style="white-space:pre-line;margin:0 0 10px"></p>
+  <div class="f" id="askField" hidden><input id="askInput" type="password" autocomplete="off"></div>
+  <div class="row"><button class="btn" id="askNo">取消</button><button class="btn primary" id="askYes">确定</button></div>
+</div></div>
+
+<div class="modal" id="mBusy"><div class="dlg" style="max-width:380px;text-align:center"><h3 id="busyMsg">处理中…</h3></div></div>
+<div id="printArea"></div>
+
+<div class="modal" id="mImport"><div class="dlg">
+  <h3>批量上传结果</h3>
+  <pre class="log" id="importLog"></pre>
+  <div class="row"><button class="btn primary" data-close>好</button></div>
+</div></div>
+
+<nav id="tabs">
+  <button data-tab="list">👥 保客</button><button data-tab="edit">✎ 资料</button><button data-tab="check">✓ 检查<span class="dot" id="tabDot" hidden></span></button>
+</nav>
+<div id="toast"></div>
+
+<script>
+/*__VENDOR__*/
+</script>
+<script type="text/plain" id="pdfWorker">/*__PDF_WORKER__*/</script>
+<script>
+"use strict";
+const LAYOUT = /*__LAYOUT__*/null;
+const STRIPS = /*__STRIPS__*/null;
+const FORM_B64 = "/*__FORM_B64__*/";
+const DEFAULT_SETTINGS = {agent_name: "", agent_iac: ""};  // each agent sets their own in ⚙ 设定
+
+// ------------------------------------------------------------------ field spec (same as filler.py)
+const YES_NO = ["Yes", "No"];
+const PART2 = Object.keys(LAYOUT.PART2_OPTIONS);
+const RELS = LAYOUT.RELATIONSHIPS;
+const ADDRESS = [
+  ["address1", "Mailing address line 1", "地址第 1 行"], ["address2", "Mailing address line 2", "地址第 2 行"],
+  ["address3", "Mailing address line 3", "地址第 3 行"], ["postcode", "Postcode", "邮编 Postcode"],
+  ["town", "Town", "城镇 Town"], ["country", "Country", "国家（空＝MALAYSIA）"]];
+// [key, label in the old Excel template, 中文标签, choices]
+const SECTIONS = [
+  ["POLICY", 1, "", [
+    ["proposal_no", "Proposal No (new proposal only)", "Proposal No（新投保才填）"],
+    ["policy_no", "Policy No", "Policy No 保单号"],
+    ["existing_trust", "Existing nomination is already a trust nomination? (Yes/No/Unknown)", "原提名已是信托提名？", ["Yes", "No", "Unknown"]],
+    ["part2_option", "Trustee option, Part 2 (blank = no trustee)", "Part 2 受托人选项（空＝不委任）", PART2]]],
+  ["POLICYOWNER", 1, "owner_", [
+    ["name", "Full name as per NRIC/Passport", "姓名（按 IC / 护照）"],
+    ["nric", "NRIC (12 digits) / Passport No", "NRIC / 护照号"],
+    ["passport_expiry", "Passport expiry date (passport only)", "护照到期日（护照才填）"],
+    ["muslim", "Muslim?", "回教徒？", YES_NO],
+    ["status", "Marital status", "婚姻状况", ["Married", "Single", "Divorced", "Widowed"]],
+    ["has_children", "Has children?", "有孩子？", YES_NO],
+    ["children_count", "No. of children", "孩子人数"],
+    ["gender", "Gender (used for checking only)", "性别（只用于核对，空＝看 IC）", ["Male", "Female"]],
+    ["dob", "Date of birth (used for checking only)", "出生日期（只用于核对）"]]],
+  ["NOMINEES", 4, "nominee", [
+    ["name", "Full name as per NRIC/Passport", "姓名（按 IC / 护照）"],
+    ["nric", "NRIC / Passport No", "NRIC / 护照号"],
+    ["passport_expiry", "Passport expiry date (passport only)", "护照到期日"],
+    ["share", "% of share (total must be 100)", "分配比例 %"],
+    ["gender", "Gender (blank = from NRIC)", "性别（空＝看 IC）", ["Male", "Female"]],
+    ["dob", "Date of birth (blank = from NRIC)", "出生日期（空＝看 IC）"],
+    ["nationality", "Nationality (Malaysian or name of country)", "国籍（空＝Malaysian）"],
+    ["relationship", "Relationship to policyowner", "与保单持有人关系", RELS],
+    ["relationship_other", "Relationship if Others", "关系（选 Others 时）"],
+    ...ADDRESS]],
+  ["TRUSTEES", 2, "trustee", [
+    ["name", "Full name as per NRIC/Passport", "姓名（按 IC / 护照）"],
+    ["nric", "NRIC / Passport No", "NRIC / 护照号"],
+    ["passport_expiry", "Passport expiry date (passport only)", "护照到期日"],
+    ["gender", "Gender (blank = from NRIC)", "性别（空＝看 IC）", ["Male", "Female"]],
+    ["dob", "Date of birth (blank = from NRIC)", "出生日期（空＝看 IC）"],
+    ["nationality", "Nationality (Malaysian or name of country)", "国籍（空＝Malaysian）"],
+    ["country_of_birth", "Country of birth (Malaysian or name of country)", "出生国家（空＝Malaysian）"],
+    ["tel", "Tel no. incl. country code, e.g. 60123456789", "电话（例 012-345 6789）"],
+    ["tel_country", "Tel country, e.g. MALAYSIA", "电话国家（空＝MALAYSIA）"],
+    ["tel_type", "Tel type", "电话类型", ["Handphone", "House", "Office"]],
+    ...ADDRESS]],
+  ["WITNESS", 1, "witness_", [
+    ["is_agent", "Witness is the agent?", "见证人是代理（我）？", YES_NO],
+    ["name", "Witness name (blank = agent name in config.json)", "见证人姓名（空＝设定里的代理）"],
+    ["iac", "Agent IAC No (blank = from config.json)", "IAC No（空＝设定）"],
+    ["nric", "NRIC / Passport No (non-agent witness only)", "NRIC / 护照号"],
+    ["passport_expiry", "Passport expiry date (non-agent, passport only)", "护照到期日"],
+    ["dob", "Date of birth (non-agent witness only)", "出生日期"],
+    ...ADDRESS.map(([k, en, zh]) => [k, en + " (non-agent witness only)", zh])]],
+];
+const SEC = Object.fromEntries(SECTIONS.map(s => [s[0], s]));
+const CHOICES = {};
+for (const [sec, , , fields] of SECTIONS) for (const f of fields) if (f[3]) CHOICES[sec + "." + f[0]] = f[3];
+
+// flat column name for bulk sheets, e.g. owner_name, nominee2_share, trustee1_tel
+function flatCols() {
+  const cols = [];
+  for (const [sec, n, prefix, fields] of SECTIONS)
+    for (let i = 1; i <= n; i++)
+      for (const f of fields) cols.push({col: (n > 1 ? `${prefix}${i}_` : prefix) + f[0], sec, idx: n > 1 ? i - 1 : null, key: f[0], f});
+  return cols;
+}
+const FLAT = flatCols();
+const norm = s => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const FLAT_BY_NORM = Object.fromEntries(FLAT.map(c => [norm(c.col), c]));
+
+function blankData() {
+  return {POLICY: {}, POLICYOWNER: {}, NOMINEES: [], TRUSTEES: [], WITNESS: {}};
+}
+
+// ------------------------------------------------------------------ helpers (ported from filler.py)
+function clean(v) {
+  if (v === null || v === undefined) return "";
+  if (v instanceof Date) return fmtDate(fromJsDate(v));
+  return String(v).replace(/\s+/g, " ").trim();
+}
+const upper = v => clean(v).toUpperCase();
+const title = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+function canon(v, choices) {
+  const s = clean(v).toLowerCase();
+  if (!s) return "";
+  if (choices === YES_NO || choices.includes("Unknown")) { if (s === "y") return "Yes"; if (s === "n") return "No"; }
+  return choices.find(c => c.toLowerCase() === s) || clean(v);
+}
+function mkDate(y, m, d) {
+  const t = new Date(y, m - 1, d);
+  return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d ? {y, m, d} : null;
+}
+function fromJsDate(dt) { const t = new Date(dt.getTime() + 12 * 3600e3); return {y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate()}; }
+const pad = (n, w = 2) => String(n).padStart(w, "0");
+const fmtDate = d => d ? `${pad(d.d)}/${pad(d.m)}/${d.y}` : "";
+const cmpDate = (a, b) => (a.y - b.y) || (a.m - b.m) || (a.d - b.d);
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+function parseDate(v) {
+  const s = clean(v);
+  let m;
+  if ((m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/))) return mkDate(+m[3], +m[2], +m[1]);
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) return mkDate(+m[1], +m[2], +m[3]);
+  if ((m = s.match(/^(\d{1,2}) ([A-Za-z]+) (\d{4})$/))) {
+    const mi = MONTHS.indexOf(m[2].slice(0, 3).toLowerCase());
+    if (mi >= 0 && (m[2].length === 3 || /^(january|february|march|april|may|june|july|august|september|october|november|december)$/i.test(m[2])))
+      return mkDate(+m[3], mi + 1, +m[1]);
+  }
+  return null;
+}
+function idInfo(raw) {
+  const s = upper(raw).replace(/[-\s]/g, "");
+  if (/^\d{12}$/.test(s)) return ["nric", s];
+  if (/^[A-Z0-9]{5,12}$/.test(s) && !/^\d+$/.test(s)) return ["passport", s];
+  return [null, s];
+}
+function nricDob(n, today) {
+  const yy = +n.slice(0, 2), mm = +n.slice(2, 4), dd = +n.slice(4, 6);
+  const year = 2000 + yy <= today.y ? 2000 + yy : 1900 + yy;
+  return mkDate(year, mm, dd);
+}
+const nricGender = n => (+n.slice(-1)) % 2 ? "Male" : "Female";
+const age = (dob, t) => t.y - dob.y - ((t.m < dob.m || (t.m === dob.m && t.d < dob.d)) ? 1 : 0);
+function wrap(text, width, rows) {
+  if (!text) return [];
+  const lines = []; let cur = "";
+  for (let w of text.split(" ")) {
+    if (cur && cur.length + 1 + w.length <= width) { cur += " " + w; continue; }
+    if (cur) { lines.push(cur); cur = ""; }
+    while (w.length > width) { lines.push(w.slice(0, width)); w = w.slice(width); }
+    cur = w;
+  }
+  if (cur) lines.push(cur);
+  return lines.length <= rows ? lines : null;
+}
+const today = (() => { const t = new Date(); return {y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate()}; })();
+const filled = o => Object.values(o || {}).some(v => clean(v));
+
+// ------------------------------------------------------------------ checking (form notes 1-4)
+function runCheck(data, cfg) {
+  const d = {POLICY: data.POLICY || {}, POLICYOWNER: data.POLICYOWNER || {}, WITNESS: data.WITNESS || {},
+             NOMINEES: (data.NOMINEES || []).filter(filled), TRUSTEES: (data.TRUSTEES || []).filter(filled)};
+  const items = [], add = (l, w, m) => items.push([l, w, m]);
+  const out = {owner: {}, nominees: [], trustees: [], witness: {}, policy: {}};
+  const pol = d.POLICY, own = d.POLICYOWNER, wit = d.WITNESS;
+
+  // the form only takes plain English letters/digits (no Chinese / accents)
+  const scan = (obj, where) => { for (const [k, v] of Object.entries(obj)) if (/[^\x20-\x7E]/.test(clean(v)))
+    add("ERROR", where, `${k} '${clean(v)}' 含中文或特殊字符 - 表格只能填英文字母和数字`); };
+  scan(pol, "Policy"); scan(own, "Policyowner"); scan(wit, "Witness");
+  d.NOMINEES.forEach((n, i) => scan(n, `Nominee ${i + 1}`)); d.TRUSTEES.forEach((t, i) => scan(t, `Trustee ${i + 1}`));
+
+  function personId(p, where, required = true) {
+    const [kind, val] = idInfo(p.nric);
+    if (!clean(p.nric)) { if (required) add("ERROR", where, "NRIC / passport number is missing"); return [null, ""]; }
+    if (!kind) { add("ERROR", where, `NRIC / passport '${clean(p.nric)}' is not 12 digits or a valid passport no.`); return [null, val]; }
+    if (kind === "passport") {
+      const exp = parseDate(p.passport_expiry);
+      if (!exp) add("ERROR", where, "passport used - passport expiry date is missing or not DD/MM/YYYY");
+      else if (cmpDate(exp, today) <= 0) add("ERROR", where, `passport expired on ${fmtDate(exp)}`);
+    }
+    return [kind, val];
+  }
+  function dobGender(p, kind, idv, where, needGender = true) {
+    let dob = parseDate(p.dob);
+    if (clean(p.dob) && !dob) add("ERROR", where, `date of birth '${clean(p.dob)}' is not DD/MM/YYYY`);
+    let gender = title(clean(p.gender));
+    if (kind === "nric") {
+      const ndob = nricDob(idv, today);
+      if (!ndob) add("ERROR", where, "first 6 digits of NRIC are not a valid date");
+      else if (!dob) { dob = ndob; add("INFO", where, `date of birth taken from NRIC: ${fmtDate(dob)}`); }
+      else if (cmpDate(dob, ndob)) add("WARNING", where, `date of birth ${fmtDate(dob)} does not match NRIC (${fmtDate(ndob)})`);
+      const g = nricGender(idv);
+      if (!gender && needGender) { gender = g; add("INFO", where, `gender taken from NRIC: ${g}`); }
+      else if (gender && gender !== g) add("WARNING", where, `gender ${gender} does not match NRIC last digit (${g})`);
+    }
+    if (needGender && !["Male", "Female"].includes(gender)) add("ERROR", where, "gender missing (Male/Female)");
+    if (!dob) add("ERROR", where, "date of birth missing");
+    return [dob, gender];
+  }
+  function address(p, where, required = true) {
+    const given = ["address1", "address2", "address3"].filter(k => clean(p[k])).map(k => upper(p[k]));
+    if (!given.length) { if (required) add("ERROR", where, "mailing address is missing"); return null; }
+    const rows = given.every(x => x.length <= 32) ? given : wrap(given.join(" "), 32, 3);
+    if (rows === null) add("ERROR", where, "address too long for the 3 rows of boxes (96 characters) - shorten it");
+    const pc = upper(p.postcode), town = upper(p.town), country = upper(p.country) || "MALAYSIA";
+    if (!pc || !town) add("ERROR", where, "postcode or town missing");
+    else if (country === "MALAYSIA" && !/^\d{5}$/.test(pc)) add("WARNING", where, `postcode '${pc}' is not 5 digits`);
+    if (town.length > 25) add("ERROR", where, "town longer than 25 boxes");
+    if (country.length > 10) add("ERROR", where, "country longer than 10 boxes - write it by hand");
+    return {rows: rows || [], postcode: pc.slice(0, 5), town: town.slice(0, 25), country: country.slice(0, 10)};
+  }
+
+  for (const key of ["proposal_no", "policy_no"]) {
+    const v = upper(pol[key]).replace(/ /g, "");
+    if (v.length > 10) add("ERROR", "Policy", `${key.replace("_", " ")} is longer than the 10 boxes on the form`);
+    out.policy[key] = v;
+  }
+  if (!out.policy.proposal_no && !out.policy.policy_no) add("ERROR", "Policy", "fill Policy No or Proposal No");
+
+  const o = out.owner;
+  o.name = upper(own.name);
+  if (!o.name) add("ERROR", "Policyowner", "name is missing");
+  else if (o.name.length > 27) add("ERROR", "Policyowner", `name has ${o.name.length} characters but the form has only 27 boxes`);
+  let kind;
+  [kind, o.id] = personId(own, "Policyowner");
+  [o.dob, o.gender] = dobGender(own, kind, o.id, "Policyowner");
+  o.muslim = canon(own.muslim, YES_NO);
+  o.status = canon(own.status, CHOICES["POLICYOWNER.status"]);
+  o.has_children = canon(own.has_children, YES_NO);
+  if (!YES_NO.includes(o.muslim)) add("ERROR", "Policyowner", "Muslim? must be Yes or No - it decides the trust rules");
+  if (!CHOICES["POLICYOWNER.status"].includes(o.status)) add("ERROR", "Policyowner", "marital status missing");
+  if (!YES_NO.includes(o.has_children)) add("ERROR", "Policyowner", "Has children? must be Yes or No");
+  o.children_count = clean(own.children_count);
+  if (o.has_children === "Yes" && !/^\d{1,2}$/.test(o.children_count)) add("ERROR", "Policyowner", "number of children missing (1-2 digits)");
+  if (o.has_children === "No" && !["", "0"].includes(o.children_count)) add("WARNING", "Policyowner", "children = No but a number of children was given - ignored");
+
+  const noms = d.NOMINEES;
+  if (!noms.length) add("ERROR", "Nominees", "no nominee filled in");
+  let total = 0;
+  const trustFlags = [];
+  const nonMuslim = o.muslim === "No", hasSpouse = o.status === "Married", hasChild = o.has_children === "Yes";
+  noms.forEach((n, i0) => {
+    const w = `Nominee ${i0 + 1}`, r = {};
+    const name = upper(n.name);
+    if (!name) add("ERROR", w, "name is missing");
+    r.name_rows = wrap(name, 28, 3);
+    if (name && r.name_rows === null) add("ERROR", w, "name longer than the 3 rows of boxes");
+    let k;
+    [k, r.id] = personId(n, w);
+    r.id_kind = k;
+    r.expiry = k === "passport" ? parseDate(n.passport_expiry) : null;
+    [r.dob, r.gender] = dobGender(n, k, r.id, w);
+    const sh = clean(n.share).replace("%", "");
+    let share = /^\s*[+-]?(\d+\.?\d*|\.\d+)\s*$/.test(sh) ? Math.round(parseFloat(sh) * 100) / 100 : null;
+    if (share === null || share <= 0 || share > 100) { add("ERROR", w, `% of share '${sh}' must be a number above 0 and up to 100`); share = 0; }
+    total += share;
+    r.share = share;
+    const nat = upper(n.nationality) || "MALAYSIAN";
+    r.nationality = nat;
+    if (!["MALAYSIAN", "MALAYSIA"].includes(nat) && nat.length > 16) add("ERROR", w, "nationality longer than 16 boxes");
+    const rel = canon(n.relationship, RELS);
+    if (!RELS.includes(rel)) add("ERROR", w, "relationship missing - pick from the list");
+    r.relationship = rel;
+    r.relationship_other = upper(n.relationship_other);
+    if (rel === "Others" && !r.relationship_other) add("ERROR", w, "relationship is Others - state the relationship");
+    r.address = address(n, w);
+    if (r.dob && age(r.dob, today) < 18 && !d.TRUSTEES.length)
+      add("INFO", w, `nominee is a minor (age ${age(r.dob, today)}) and no trustee is appointed - see form note 3 on who acts as trustee`);
+    if (["Husband", "Wife"].includes(rel) && o.status !== "Married") add("WARNING", w, `nominee is ${rel} but policyowner status is ${o.status || "blank"}`);
+    if ((rel === "Husband" && o.gender === "Male") || (rel === "Wife" && o.gender === "Female"))
+      add("WARNING", w, `relationship ${rel} does not fit policyowner gender ${o.gender} - check`);
+    if (["Son", "Daughter"].includes(rel) && !hasChild) add("WARNING", w, `nominee is ${rel} but policyowner says no children`);
+    if (r.id && r.id === o.id) add("ERROR", w, "nominee has the same NRIC as the policyowner");
+    const spouseChild = ["Husband", "Wife", "Son", "Daughter"].includes(rel);
+    const parentOk = ["Father", "Mother"].includes(rel) && !hasSpouse && !hasChild;
+    const trust = nonMuslim && (spouseChild || parentOk);
+    trustFlags.push(trust);
+    if (o.muslim === "Yes")
+      add("INFO", w, "Muslim policyowner: per form note 4(a) the nominee does not receive solely as beneficiary and payment forms part of the estate");
+    else if (nonMuslim && !trust) {
+      const why = ["Father", "Mother"].includes(rel) ? " (policyowner has a spouse or child)" : "";
+      add("INFO", w, `${rel} is not a trust nominee${why}: per form note 1 the nominee receives as executor, not solely as beneficiary. Explain to client; assignment form if beneficial receipt is intended.`);
+    }
+    out.nominees.push(r);
+  });
+  if (noms.length && Math.round(total * 100) / 100 !== 100) add("ERROR", "Nominees", `% of share adds up to ${+total.toFixed(2)}%, must be exactly 100%`);
+
+  const trs = d.TRUSTEES;
+  const opt = canon(pol.part2_option, PART2);
+  out.policy.part2_option = opt;
+  const anyTrust = trustFlags.some(Boolean);
+  if (o.muslim === "Yes" && (trs.length || opt)) add("ERROR", "Trustees", "Muslim policyowner should NOT appoint a trustee (form note 4a)");
+  else if (nonMuslim && trs.length && !anyTrust)
+    add("ERROR", "Trustees", "no nominee is spouse/child (or parent where no spouse/child) - trustee should NOT be appointed (form note 4b)");
+  if (anyTrust && !trs.length)
+    add("WARNING", "Trustees", "trust nomination (Schedule 10 FSA 2013): form note 2 says to appoint a trustee other than the policyowner. If none, note 3 decides the trustee.");
+  if (anyTrust && !trustFlags.every(Boolean)) add("WARNING", "Nominees", "mix of trust and non-trust nominees - confirm treatment with Great Eastern");
+  if (trs.length && !PART2.includes(opt)) add("ERROR", "Part 2", "trustees given - choose the Part 2 trustee option");
+  if (opt && opt !== "Revoke all existing" && !trs.length) add("ERROR", "Part 2", `option '${opt}' needs at least one trustee`);
+  if (anyTrust) add("INFO", "Trust", "trust policy: the policyowner cannot revoke the nomination, vary, surrender, assign or pledge the policy without the trustee's written consent (form note 2)");
+  trs.forEach((t, i0) => {
+    const w = `Trustee ${i0 + 1}`, r = {};
+    const name = upper(t.name);
+    r.name_rows = wrap(name, 28, 3);
+    if (!name) add("ERROR", w, "name is missing");
+    else if (r.name_rows === null) add("ERROR", w, "name longer than the 3 rows of boxes");
+    let k;
+    [k, r.id] = personId(t, w);
+    r.expiry = k === "passport" ? parseDate(t.passport_expiry) : null;
+    [r.dob, r.gender] = dobGender(t, k, r.id, w);
+    if (r.id && r.id === o.id) add("ERROR", w, "policyowner cannot appoint themself as trustee");
+    if (r.dob && age(r.dob, today) < 18) add("ERROR", w, `trustee is under 18 (age ${age(r.dob, today)})`);
+    r.nationality = upper(t.nationality) || "MALAYSIAN";
+    r.country_of_birth = upper(t.country_of_birth) || "MALAYSIAN";
+    let tel = clean(t.tel).replace(/\D/g, "");
+    if (tel.startsWith("0")) { tel = "6" + tel; add("INFO", w, `tel no. given without country code - written as +${tel}`); }
+    if (!tel) add("WARNING", w, "tel no. missing - left blank");
+    else if (tel.length > 11) add("ERROR", w, `tel no. ${tel} longer than the 11 boxes`);
+    r.tel = tel;
+    r.tel_country = upper(t.tel_country) || (tel.startsWith("60") ? "MALAYSIA" : "");
+    r.tel_type = canon(t.tel_type, CHOICES["TRUSTEES.tel_type"]) || (tel.startsWith("601") ? "Handphone" : "");
+    r.address = address(t, w);
+    out.trustees.push(r);
+  });
+  if (["Yes", "Unknown"].includes(canon(pol.existing_trust, ["Yes", "No", "Unknown"])) || opt.startsWith("Revoke"))
+    add("WARNING", "Part 3", "if the existing nomination is a trust nomination, Part 3 consent of the existing nominees/trustees is needed - Part 3 is left for handwriting");
+
+  const r = out.witness;
+  r.is_agent = canon(wit.is_agent, YES_NO) || "Yes";
+  if (r.is_agent === "Yes") {
+    r.name = upper(wit.name) || upper(cfg.agent_name);
+    r.iac = upper(wit.iac) || upper(cfg.agent_iac);
+    if (!r.name) add("ERROR", "Witness", "agent name missing (⚙ 设定)");
+    if (!r.iac) add("WARNING", "Witness", "agent IAC No missing (⚙ 设定) - left blank to handwrite");
+  } else {
+    r.name = upper(wit.name); r.iac = "";
+    r.name_rows = wrap(r.name, 28, 2);
+    if (!r.name) add("ERROR", "Witness", "witness name missing");
+    else if (r.name_rows === null) add("ERROR", "Witness", "witness name longer than the 2 rows of boxes");
+    let k;
+    [k, r.id] = personId(wit, "Witness");
+    r.expiry = k === "passport" ? parseDate(wit.passport_expiry) : null;
+    [r.dob] = dobGender(wit, k, r.id, "Witness", false);
+    if (r.dob && age(r.dob, today) < 18) add("ERROR", "Witness", "witness must be more than 18 years old");
+    r.address = address(wit, "Witness");
+    const ids = new Set([o.id, ...out.nominees.map(x => x.id), ...out.trustees.map(x => x.id)]);
+    if (r.id && ids.has(r.id)) add("ERROR", "Witness", "witness cannot be the policyowner, a nominee or a trustee");
+  }
+  const names = new Set([o.name, ...[...out.nominees, ...out.trustees].map(x => (x.name_rows || []).join(" "))]);
+  if (r.name && names.has(r.name)) add("ERROR", "Witness", "witness cannot be the policyowner, a nominee or a trustee");
+  return {items, out, errors: items.filter(i => i[0] === "ERROR").length, warnings: items.filter(i => i[0] === "WARNING").length};
+}
+
+// ------------------------------------------------------------------ PDF writing (pdf-lib, page height 842pt)
+let FORM_BYTES = null;
+function formBytes() {
+  if (!FORM_BYTES) FORM_BYTES = Uint8Array.from(atob(FORM_B64), c => c.charCodeAt(0));
+  return FORM_BYTES;
+}
+async function buildPdf(out) {
+  const {PDFDocument, StandardFonts, rgb, LineCapStyle} = PDFLib;
+  const doc = await PDFDocument.load(formBytes());
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pages = doc.getPages(), H = 842, INK = rgb(0.05, 0.1, 0.45);
+  const text = (p, x, y, s, size) => pages[p - 1].drawText(s, {x, y: H - y, size, font, color: INK});
+  function stripAt(p, x, y) {
+    const hits = STRIPS[p].filter(s => s[0] - 1 <= x && x <= s[2] + 1 && s[1] - 1 <= y && y <= s[3] + 1);
+    return hits.length ? hits.reduce((a, b) => (b[2] - b[0]) * (b[3] - b[1]) < (a[2] - a[0]) * (a[3] - a[1]) ? b : a) : null;
+  }
+  function comb(p, pt, s, perCell = 1, align = "left", size = 9) {
+    if (!s) return;
+    const st = stripAt(p, pt[0], pt[1]);
+    if (!st) throw new Error(`no boxes found at page ${p} ${pt} - form layout changed?`);
+    const cells = st[4], chunks = [];
+    for (let i = 0; i < s.length; i += perCell) chunks.push(s.slice(i, i + perCell));
+    if (chunks.length > cells.length) throw new Error(`'${s}' does not fit ${cells.length} boxes on page ${p}`);
+    const use = align === "right" ? cells.slice(cells.length - chunks.length) : cells;
+    size = perCell === 1 ? size : 7.2;
+    const base = (st[1] + st[3]) / 2 + size * 0.36;
+    chunks.forEach((ch, i) => { const [x0, x1] = use[i]; text(p, (x0 + x1) / 2 - font.widthOfTextAtSize(ch, size) / 2, base, ch, size); });
+  }
+  function tick(p, [x, y]) {
+    const pts = [[x - 3.2, y], [x - 0.8, y + 2.8], [x + 3.6, y - 3.4]];
+    for (let i = 0; i < 2; i++)
+      pages[p - 1].drawLine({start: {x: pts[i][0], y: H - pts[i][1]}, end: {x: pts[i + 1][0], y: H - pts[i + 1][1]},
+                              thickness: 1.3, color: INK, lineCap: LineCapStyle.Round});
+  }
+  function boxText(p, rect, s) {
+    if (!s) return;
+    const [x0, y0, x1, y1] = [rect[0] + 2, rect[1] + 1, rect[2] - 2, rect[3] - 1];
+    for (const size of [8.5, 7.5, 6.5, 5.5])
+      if (font.widthOfTextAtSize(s, size) <= x1 - x0) { text(p, x0, (y0 + y1) / 2 + size * 0.36, s, size); return; }
+    throw new Error(`'${s}' too long for box on page ${p}`);
+  }
+  function date(p, pts, d) {
+    if (!d) return;
+    [pad(d.d), pad(d.m), pad(d.y, 4)].forEach((part, i) => comb(p, pts[i], part, i === 2 ? 2 : 1));
+  }
+  function addr(p, f, a) {
+    if (!a) return;
+    a.rows.forEach((line, i) => f.address[i] && comb(p, f.address[i], line));
+    comb(p, f.postcode, a.postcode); comb(p, f.town, a.town); comb(p, f.country, a.country);
+  }
+  function choice(p, opts, v, otherPt) {
+    if (["MALAYSIAN", "MALAYSIA"].includes(v)) tick(p, opts.Malaysian);
+    else if (v) { tick(p, opts.Others); comb(p, otherPt, v); }
+  }
+
+  const pol = out.policy, o = out.owner, L = LAYOUT;
+  for (const [pno, pts] of Object.entries(L.HEADER)) {
+    comb(+pno, pts.proposal_no, pol.proposal_no); comb(+pno, pts.policy_no, pol.policy_no);
+  }
+  let p = L.OWNER.page;
+  comb(p, L.OWNER.name, o.name); comb(p, L.OWNER.nric, o.id);
+  tick(p, L.OWNER.muslim[o.muslim]); tick(p, L.OWNER.status[o.status]); tick(p, L.OWNER.children[o.has_children]);
+  if (o.has_children === "Yes") {
+    const pts = L.OWNER.children_count.slice(-o.children_count.length);
+    [...o.children_count].forEach((ch, i) => comb(p, pts[i], ch));
+  }
+  out.nominees.forEach((n, i) => {
+    const f = L.NOMINEES[i]; p = f.page;
+    n.name_rows.forEach((line, j) => comb(p, f.name[j], line));
+    comb(p, f.nric, n.id); date(p, f.passport_expiry, n.expiry);
+    const [whole, dec] = n.share.toFixed(2).split(".");
+    comb(p, f.share[0], whole, 1, "right"); comb(p, f.share[1], dec);
+    tick(p, f.gender[n.gender]); date(p, f.dob, n.dob);
+    choice(p, f.nationality, n.nationality, f.nationality_other);
+    tick(p, f.relationship[n.relationship]);
+    if (n.relationship === "Others") boxText(p, f.relationship_other, n.relationship_other);
+    addr(p, f, n.address);
+  });
+  const wit = out.witness, s1 = L.PART1_SIGN;
+  boxText(s1.page, s1.owner_name, o.name); boxText(s1.page, s1.witness_name, wit.name); boxText(s1.page, s1.witness_iac, wit.iac || "");
+  const trustees = out.trustees;
+  if (wit.is_agent !== "Yes")
+    for (const f of trustees.length ? [L.WITNESS_P3, L.WITNESS_P5] : [L.WITNESS_P3]) {
+      p = f.page;
+      (wit.name_rows || []).forEach((line, j) => comb(p, f.name[j], line));
+      comb(p, f.nric, wit.id); date(p, f.passport_expiry, wit.expiry); date(p, f.dob, wit.dob); addr(p, f, wit.address);
+    }
+  if (L.PART2_OPTIONS[pol.part2_option]) tick(3, L.PART2_OPTIONS[pol.part2_option]);
+  trustees.forEach((t, i) => {
+    const f = L.TRUSTEES[i]; p = f.page;
+    t.name_rows.forEach((line, j) => comb(p, f.name[j], line));
+    comb(p, f.nric, t.id); date(p, f.passport_expiry, t.expiry);
+    tick(p, f.gender[t.gender]); date(p, f.dob, t.dob);
+    choice(p, f.nationality, t.nationality, f.nationality_other);
+    choice(p, f.country_of_birth, t.country_of_birth, f.country_of_birth_other);
+    comb(p, f.tel, t.tel); comb(p, f.tel_country, t.tel_country.slice(0, 8));
+    if (f.tel_type[t.tel_type]) tick(p, f.tel_type[t.tel_type]);
+    addr(p, f, t.address);
+  });
+  if (trustees.length || pol.part2_option) {
+    const s2 = L.PART2_SIGN;
+    boxText(4, s2.owner_name, o.name);
+    trustees.forEach((t, i) => s2.trustee_names[i] && boxText(4, s2.trustee_names[i], t.name_rows.join(" ")));
+    boxText(4, s2.witness_name, wit.name); boxText(4, s2.witness_iac, wit.iac || "");
+  }
+  doc.setTitle(`${L.FORM_CODE} - ${o.name}`);
+  doc.setProducer("保客填表");
+  return doc.save();
+}
+
+// ------------------------------------------------------------------ storage
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+let settings = {...DEFAULT_SETTINGS, ...store.get("nff_settings", {})};
+let customers = store.get("nff_customers", []);
+let selId = customers[0]?.id || null, filter = "all", query = "";
+const save = () => store.set("nff_customers", customers);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const cur = () => customers.find(c => c.id === selId);
+const checkOf = c => runCheck(c.data, settings);
+
+// ------------------------------------------------------------------ bulk import
+function cellValue(v) {
+  if (v === null || v === undefined) return "";
+  if (v instanceof Date) return fmtDate(fromJsDate(v));
+  if (typeof v === "number") return Number.isInteger(v) ? String(v) : String(+v.toFixed(6));
+  return clean(v);
+}
+// Excel drops the leading 0 of NRICs / postcodes typed as numbers
+function fixNumber(key, raw, s) {
+  if (typeof raw !== "number" || !/^\d+$/.test(s)) return s;
+  if (key === "nric" && s.length < 12 && s.length >= 10) return s.padStart(12, "0");
+  if (key === "postcode" && s.length === 4) return s.padStart(5, "0");
+  return s;
+}
+function setField(data, sec, idx, key, raw) {
+  const v = fixNumber(key, raw, cellValue(raw));
+  if (!v) return;
+  if (idx === null) data[sec][key] = v;
+  else { while (data[sec].length <= idx) data[sec].push({}); data[sec][idx][key] = v; }
+}
+function tidy(data) {
+  data.NOMINEES = data.NOMINEES.filter(filled);
+  data.TRUSTEES = data.TRUSTEES.filter(filled);
+  return data;
+}
+function parseVertical(rows) {
+  const labelMap = {};
+  for (const [sec, n, , fields] of SECTIONS) labelMap[sec] = Object.fromEntries(fields.map(f => [f[1], [f[0], n]]));
+  const data = blankData();
+  let sec = null;
+  for (const row of rows) {
+    const a = clean(row[0]);
+    if (labelMap[a]) { sec = a; continue; }
+    if (!sec || !labelMap[sec][a]) continue;
+    const [key, n] = labelMap[sec][a];
+    for (let i = 0; i < n; i++) setField(data, sec, n > 1 ? i : null, key, row[1 + i]);
+  }
+  return tidy(data);
+}
+function parseFlat(rows) {
+  const hi = rows.findIndex(r => (r || []).some(c => FLAT_BY_NORM[norm(c)]));
+  if (hi < 0) return [];
+  const map = rows[hi].map(c => FLAT_BY_NORM[norm(c)] || null);
+  const list = [];
+  for (const row of rows.slice(hi + 1)) {
+    if (!row || !row.some(c => cellValue(c))) continue;
+    const data = blankData();
+    map.forEach((m, j) => m && setField(data, m.sec, m.idx, m.key, row[j]));
+    list.push(tidy(data));
+  }
+  return list;
+}
+async function importFiles(files) {
+  const log = [];
+  let added = 0;
+  for (const file of files) {
+    try {
+      const wb = XLSX.read(await file.arrayBuffer(), {type: "array", cellDates: true, raw: false});
+      let n = 0;
+      for (const name of wb.SheetNames) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header: 1, raw: true, defval: null, blankrows: false});
+        const vertical = rows.some(r => ["POLICY", "POLICYOWNER", "NOMINEES"].includes(clean(r && r[0])));
+        const datas = vertical ? [parseVertical(rows)] : parseFlat(rows);
+        for (const data of datas) {
+          customers.push({id: uid(), data, source: file.name, created: new Date().toISOString()});
+          n++;
+        }
+      }
+      added += n;
+      log.push(`${file.name}: ${n ? `加入 ${n} 位保客` : "找不到可读的资料（请用「下载批量模板」的格式）"}`);
+    } catch (e) {
+      log.push(`${file.name}: 读取失败 - ${e.message}`);
+    }
+  }
+  save();
+  if (added) selId = customers[customers.length - added].id;
+  const fresh = customers.slice(customers.length - added).map(checkOf);
+  const bad = fresh.filter(r => r.errors).length;
+  log.push("", `共加入 ${added} 位：${added - bad} 位可直接导出，${bad} 位需要修改（红色）。`);
+  document.getElementById("importLog").textContent = log.join("\n");
+  openModal("mImport");
+  renderAll(); setTab("list");
+}
+
+// template + data export (one customer per row)
+const EXAMPLE = {
+  policy_no: "0123456789", existing_trust: "No", part2_option: "Appoint",
+  owner_name: "TAN MEI LING", owner_nric: "880512-07-5566", owner_muslim: "No", owner_status: "Married",
+  owner_has_children: "Yes", owner_children_count: "2",
+  nominee1_name: "LIM WEI JIE", nominee1_nric: "860301-07-5123", nominee1_share: "50", nominee1_relationship: "Husband",
+  nominee1_address1: "12 LORONG BUKIT JAMBUL 3", nominee1_address2: "TAMAN BUKIT JAMBUL", nominee1_postcode: "11900", nominee1_town: "BAYAN LEPAS",
+  nominee2_name: "LIM XIN YI", nominee2_nric: "150820-07-0246", nominee2_share: "50", nominee2_relationship: "Daughter",
+  nominee2_address1: "12 LORONG BUKIT JAMBUL 3", nominee2_address2: "TAMAN BUKIT JAMBUL", nominee2_postcode: "11900", nominee2_town: "BAYAN LEPAS",
+  trustee1_name: "TAN KOK SENG", trustee1_nric: "850707-07-5011", trustee1_tel: "012-456 7890",
+  trustee1_address1: "8 JALAN MASJID NEGERI", trustee1_postcode: "11600", trustee1_town: "GEORGETOWN",
+  witness_is_agent: "Yes",
+};
+function flatRow(data) {
+  return FLAT.map(c => (c.idx === null ? data[c.sec][c.key] : (data[c.sec][c.idx] || {})[c.key]) || "");
+}
+function sheetFrom(aoa) {
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = aoa[0].map(h => ({wch: Math.max(12, String(h).length + 2)}));
+  for (const cell of Object.keys(ws)) if (cell[0] !== "!") ws[cell].t = "s", ws[cell].z = "@";
+  return ws;
+}
+function saveWorkbook(wb, name) {
+  downloadBlob(new Blob([XLSX.write(wb, {type: "array", bookType: "xlsx"})]), name);
+}
+function downloadTemplate() {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheetFrom([FLAT.map(c => c.col), FLAT.map(c => EXAMPLE[c.col] || "")]), "Customers");
+  const guide = [["栏位 Column", "填什么", "可选值"],
+    ["（通用）", "每一行 = 一位保客。删除第 2 行示例后填入。不用的栏位留空。日期用 DD/MM/YYYY。IC 请连 - 一起打（例 880512-07-5566），以免 Excel 去掉开头的 0。只能用英文字母和数字。", ""],
+    ...FLAT.map(c => [c.col, (c.idx !== null ? `${c.sec === "NOMINEES" ? "受益人" : "受托人"} ${c.idx + 1} · ` : "") + c.f[2], (c.f[3] || []).join(" / ")])];
+  const ws = XLSX.utils.aoa_to_sheet(guide);
+  ws["!cols"] = [{wch: 28}, {wch: 70}, {wch: 50}];
+  XLSX.utils.book_append_sheet(wb, ws, "说明");
+  saveWorkbook(wb, "保客批量模板.xlsx");
+}
+function exportData() {
+  if (!customers.length) return toast("还没有保客资料");
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheetFrom([FLAT.map(c => c.col), ...customers.map(c => flatRow(c.data))]), "Customers");
+  saveWorkbook(wb, `保客资料_${today.y}${pad(today.m)}${pad(today.d)}.xlsx`);
+}
+
+// ------------------------------------------------------------------ PDF export
+const safe = s => s.replace(/[\\/:*?"<>|]+/g, "").trim();
+function pdfName(c, chk) {
+  const ref = chk.out.policy.policy_no || chk.out.policy.proposal_no || "NOPOLICY";
+  return safe(`${ref}_${chk.out.owner.name || "CLIENT"}.pdf`);
+}
+// Opened from a claude.ai link the page runs in a frame: files go through the app's save prompt
+// and printing happens from the saved PDF. Opened as a local file it downloads and prints directly.
+const HOSTED = (() => { try { return window.self !== window.top; } catch { return true; } })();
+const saver = HOSTED && window.claude?.use ? window.claude.use("downloads") : Promise.resolve(null);
+async function downloadBlob(blob, name) {
+  const dl = await saver;
+  if (dl) {
+    try { await dl.save({filename: name, data: blob}); return true; }
+    catch (e) { if (e && e.code !== "declined") toast(`没能保存：${e.message || e.code}`); return false; }
+  }
+  if (HOSTED) { toast("这里不能保存文件，请在 Claude App 或浏览器里打开链接"); return false; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  return true;
+}
+// in-page replacement for confirm()/prompt(), which a hosted page cannot show
+function ask(title, msg, {password = false, ok = "确定"} = {}) {
+  return new Promise(res => {
+    $("askTitle").textContent = title; $("askMsg").textContent = msg; $("askYes").textContent = ok;
+    $("askField").hidden = !password; $("askInput").value = "";
+    const done = v => { $("mAsk").classList.remove("open"); $("askYes").onclick = $("askNo").onclick = $("askInput").onkeydown = null; res(v); };
+    $("askYes").onclick = () => done(password ? $("askInput").value : true);
+    $("askNo").onclick = () => done(password ? null : false);
+    $("askInput").onkeydown = e => { if (e.key === "Enter") $("askYes").click(); };
+    openModal("mAsk");
+    if (password) setTimeout(() => $("askInput").focus(), 50);
+  });
+}
+async function makePdf(c) {
+  const chk = checkOf(c);
+  if (chk.errors) throw new Error(`还有 ${chk.errors} 个错误要修改，才能生成 PDF`);
+  return {bytes: await buildPdf(chk.out), name: pdfName(c, chk)};
+}
+async function exportOne(c) {
+  try {
+    const {bytes, name} = await makePdf(c);
+    if (await downloadBlob(new Blob([bytes], {type: "application/pdf"}), name))
+      toast(HOSTED ? `已保存 ${name}\n打开这个 PDF 就可以打印` : `已导出 ${name}`);
+  } catch (e) { toast(e.message); }
+}
+async function exportZip() {
+  if (!customers.length) return toast("还没有保客资料");
+  const zip = new JSZip(), skipped = [], used = new Set();
+  let n = 0;
+  for (const c of customers) {
+    try {
+      let {bytes, name} = await makePdf(c);
+      while (used.has(name)) name = name.replace(/(\(\d+\))?\.pdf$/, m => `(${(parseInt(m.slice(1)) || 1) + 1}).pdf`);
+      used.add(name); zip.file(name, bytes); n++;
+    } catch (e) { skipped.push(displayName(c)); }
+  }
+  if (!n) return toast("没有可导出的保客（全部还有错误）");
+  if (await downloadBlob(await zip.generateAsync({type: "blob"}), `提名表格_${today.y}${pad(today.m)}${pad(today.d)}.zip`))
+    toast(`已导出 ${n} 份 PDF` + (skipped.length ? `\n跳过 ${skipped.length} 位（还有错误）：${skipped.join("、")}` : ""));
+}
+async function preview(c) {
+  try {
+    const {bytes, name} = await makePdf(c);
+    const box = document.getElementById("pvPages");
+    box.innerHTML = "";
+    document.getElementById("pvTitle").textContent = `预览：${name}（请对照客户 IC 核对每一页）`;
+    await renderPages(bytes, box, 1.6, "生成预览");
+    busy();
+    openModal("mPreview");
+  } catch (e) { busy(); toast(e.message); }
+}
+
+// ------------------------------------------------------------------ printing (pages rendered as images, so it works from a local file)
+let workerSet = false;
+function pdfjs() {
+  if (!workerSet) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([document.getElementById("pdfWorker").textContent], {type: "text/javascript"}));
+    workerSet = true;
+  }
+  return pdfjsLib;
+}
+function busy(msg) { if (msg) { $("busyMsg").textContent = msg; openModal("mBusy"); } else $("mBusy").classList.remove("open"); }
+// renders every page of a PDF as <img> into `box` (used for preview and printing; phones can't show PDFs inline)
+async function renderPages(bytes, box, scale, label) {
+  const doc = await pdfjs().getDocument({data: bytes.slice()}).promise;
+  for (let p = 1; p <= doc.numPages; p++) {
+    busy(`${label}… 第 ${box.children.length + 1} 页`);
+    const page = await doc.getPage(p), vp = page.getViewport({scale});
+    const cv = document.createElement("canvas");
+    cv.width = vp.width; cv.height = vp.height;
+    // intent "print" avoids requestAnimationFrame, which stalls in background tabs on phones
+    await page.render({canvasContext: cv.getContext("2d"), viewport: vp, intent: "print"}).promise;
+    const img = new Image();
+    await new Promise(r => { img.onload = img.onerror = r; img.src = cv.toDataURL("image/png"); });
+    box.appendChild(img);
+  }
+}
+async function printPdfs(list) {
+  const area = $("printArea");
+  area.innerHTML = "";
+  try { for (const bytes of list) await renderPages(bytes, area, 2.5, "准备打印"); } finally { busy(); }
+  window.print();
+}
+window.addEventListener("afterprint", () => { $("printArea").innerHTML = ""; });
+async function printOne(c) {
+  try { const {bytes} = await makePdf(c); await printPdfs([bytes]); } catch (e) { busy(); toast(e.message); }
+}
+async function printAll() {
+  const list = [], skipped = [];
+  for (const c of customers) {
+    try { list.push((await makePdf(c)).bytes); } catch { skipped.push(displayName(c)); }
+  }
+  if (!list.length) return toast("没有可打印的保客（全部还有错误）");
+  if (skipped.length) toast(`跳过 ${skipped.length} 位（还有错误）：${skipped.join("、")}`);
+  await printPdfs(list);
+}
+
+// ------------------------------------------------------------------ capture details from an uploaded policy
+// Text PDFs are read directly (offline). Scanned PDFs / photos need OCR, which downloads tesseract.js once;
+// the document itself is read inside this browser and never uploaded.
+const TESSERACT_URL = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+let ocrWorker = null;
+async function ocr(image) {
+  // the OCR engine downloads its data at run time, which a hosted page is not allowed to do
+  if (HOSTED) throw new Error("手机链接版不能读取照片 / 扫描件，请用电脑版或手动输入。GE 电子保单 PDF 可以直接读取。");
+  if (!window.Tesseract) await new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = TESSERACT_URL; s.onload = res;
+    s.onerror = () => rej(new Error("这是扫描件/图片，需要上网下载文字识别工具（只下载工具，保单不会上传）"));
+    document.head.appendChild(s);
+  });
+  if (!ocrWorker) ocrWorker = await Tesseract.createWorker("eng");
+  const {data} = await ocrWorker.recognize(image);
+  return data.text.split("\n").map(s => s.replace(/\s{2,}/g, "  ").trim()).filter(Boolean);
+}
+// lines of text; columns that are far apart are joined with "  " so labels and values stay separable
+async function documentLines(file) {
+  if (/\.(jpe?g|png)$/i.test(file.name)) { busy(`识别图片文字… ${file.name}`); return {lines: await ocr(file), ocr: true}; }
+  const task = pdfjs().getDocument({data: new Uint8Array(await file.arrayBuffer())});
+  task.onPassword = (update, reason) => {  // GE e-policies are password protected
+    busy();
+    ask("保单密码", `${file.name}\n${reason === 2 ? "密码不对，请再输入。" : "这份保单有密码，请输入密码。"}`, {password: true})
+      .then(pw => { if (pw === null) task.destroy(); else { busy(`读取保单… ${file.name}`); update(pw); } });
+  };
+  let doc;
+  try { doc = await task.promise; } catch (e) {
+    throw new Error(e.name === "PasswordException" || /destroy/i.test(e.message) ? "没有输入密码，无法读取" : e.message);
+  }
+  const lines = [], scanned = [];
+  let usedOcr = false;
+  for (let p = 1; p <= Math.min(doc.numPages, 40); p++) {
+    const page = await doc.getPage(p);
+    const items = (await page.getTextContent()).items.filter(i => i.str && i.str.trim())
+      .map(i => ({x: i.transform[4], y: i.transform[5], w: i.width, h: Math.abs(i.transform[3]) || 8, s: i.str}));
+    if (items.length < 5) { scanned.push(page); continue; }
+    items.sort((a, b) => b.y - a.y || a.x - b.x);
+    const rows = [];
+    for (const it of items) {
+      const r = rows.find(r => Math.abs(r.y - it.y) <= Math.max(2.5, it.h * 0.35));
+      r ? r.items.push(it) : rows.push({y: it.y, items: [it]});
+    }
+    rows.sort((a, b) => b.y - a.y);
+    for (const r of rows) {
+      r.items.sort((a, b) => a.x - b.x);
+      let s = "", end = null;
+      for (const it of r.items) {
+        if (end !== null) { const gap = it.x - end; s += gap > it.h * 1.2 ? "  " : gap > it.h * 0.15 ? " " : ""; }
+        s += it.s.trim(); end = it.x + it.w;
+      }
+      lines.push(s.replace(/ {3,}/g, "  ").trim());
+    }
+  }
+  // fully scanned document: read the first few pages with OCR
+  if (lines.length < 15)
+    for (const page of scanned.slice(0, 3)) {
+      busy(`识别扫描页文字… 第 ${page.pageNumber} 页`);
+      const vp = page.getViewport({scale: 2.5}), cv = document.createElement("canvas");
+      cv.width = vp.width; cv.height = vp.height;
+      await page.render({canvasContext: cv.getContext("2d"), viewport: vp, intent: "print"}).promise;
+      lines.push(...await ocr(cv));
+      usedOcr = true;
+    }
+  return {lines: lines.filter(Boolean), ocr: usedOcr};
+}
+
+const IC_RE = /\b(\d{6})\s?-?\s?(\d{2})\s?-?\s?(\d{4})\b/;
+const POSTCODE_RE = /\b(\d{5})\b/;
+const STATES = /\b(PULAU PINANG|PENANG|SELANGOR|JOHOR|KEDAH|PERAK|KELANTAN|TERENGGANU|PAHANG|MELAKA|MALACCA|NEGERI SEMBILAN|PERLIS|SABAH|SARAWAK|W\.?\s?P\.?|WILAYAH PERSEKUTUAN|KUALA LUMPUR|PUTRAJAYA|LABUAN|MALAYSIA)\b/gi;
+const REL_WORDS = [[/\b(husband|suami)\b/i, "Husband"], [/\b(wife|isteri|istri)\b/i, "Wife"], [/\b(son|anak lelaki)\b/i, "Son"],
+  [/\b(daughter|anak perempuan)\b/i, "Daughter"], [/\b(father|bapa|ayah)\b/i, "Father"], [/\b(mother|ibu|emak)\b/i, "Mother"],
+  [/\b(brother|abang|adik lelaki)\b/i, "Brother"], [/\b(sister|kakak|adik perempuan)\b/i, "Sister"]];
+const LABELS = {
+  policy_no: /\b(policy|certificate|polisi|sijil)\s*(no|number|num|nombor)\b\.?|\bno\.?\s*(polisi|sijil)\b/i,
+  proposal_no: /\b(proposal|cadangan)\s*(no|number|nombor)\b\.?|\bno\.?\s*cadangan\b/i,
+  owner: /\b(name\s+of\s+)?(policy\s*-?\s*owner|policyholder|policy\s*holder|proposer|participant|pemunya\s*polisi|pemegang\s*polisi|pencadang)(\s*&\s*life\s*assured)?(\s*name)?(?!\s*'\s*s)\b/i,
+  assured: /\b(life\s*(to\s*be\s*)?assured|life\s*insured|insured\s*person|person\s*covered|orang\s*yang\s*diinsuranskan)\b/i,
+  nric: /\b(nric|new\s*i\.?\/?c|i\.?\/?c\.?|mykad|identity\s*card|id\s*no|no\.?\s*k\.?\/?p\.?|kad\s*pengenalan)\b/i,
+  dob: /\b(date\s*of\s*birth|d\.?o\.?b\.?|tarikh\s*lahir)\b/i,
+  gender: /\b(sex|gender|jantina)\b/i,
+  religion: /\b(religion|agama)\b/i,
+  status: /\b(marital\s*status|taraf\s*perkahwinan|status\s*perkahwinan)\b/i,
+  address: /\b(mailing|correspondence|residential|home|postal)?\s*address\b|\balamat\b|\bpolicyowner\s*'\s*s(?=\s*:)/i,
+  nominee: /\b(nominee|penama|beneficiar)/i,
+};
+const anyLabel = s => Object.entries(LABELS).some(([k, re]) => k !== "address" && re.test(s));
+// value on the same line after the label, else the next line
+function after(lines, re, test = v => v, from = 0) {
+  for (let i = from; i < lines.length; i++) {
+    const m = lines[i].match(re);
+    if (!m) continue;
+    const rest = lines[i].slice(m.index + m[0].length).replace(/^[\s:.\-–/|]+/, "");
+    for (const cand of [rest, lines[i + 1] || ""]) { const v = test(cand); if (v) return {v, i}; }
+  }
+  return null;
+}
+const firstCell = s => s.split("  ")[0].trim();
+const TITLES = /^(MISS|MR|MRS|MDM|MS|MADAM|DR|ENCIK|EN|PUAN|PN|CIK|TUAN|DATO'?|DATIN|DATUK)\.?\s+/;
+// names are printed in capitals on policies; sentences in mixed case are skipped
+const asName = s => {
+  const raw = firstCell(s.replace(IC_RE, "")).replace(/^[\s:.\-]+/, "");
+  if (/[a-z]/.test(raw) || raw.split(" ").length > 8) return "";
+  const v = raw.replace(/[^A-Za-z@'./\- ]/g, " ").replace(/\s+/g, " ").trim().toUpperCase().replace(TITLES, "");
+  return v.length >= 4 && /[A-Z]{2}/.test(v) && !anyLabel(v) && !/\b(SIGNATURE|TANDATANGAN|DATE|DETAILS|BUTIRAN|PARTICULARS|ADDRESS|ALAMAT)\b/.test(v) ? v : "";
+};
+const asIc = s => { const m = s.match(IC_RE); return m ? `${m[1]}-${m[2]}-${m[3]}` : ""; };
+const asPolicy = s => { const m = s.replace(/\s/g, " ").match(/\b([A-Z]{0,3}\d[\dA-Z-]{5,13})\b/i); return m ? m[1].replace(/-/g, "").toUpperCase() : ""; };
+const asDate = s => {
+  const m = s.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})\b/) || s.match(/\b(\d{1,2})[ \-]([A-Za-z]{3,9})[ \-,]+(\d{4})\b/);
+  if (!m) return "";
+  let mo = +m[2];
+  if (isNaN(mo)) { mo = MONTHS.indexOf(m[2].slice(0, 3).toLowerCase()) + 1; if (!mo) return ""; }
+  const d = mkDate(+m[3], mo, +m[1]);
+  return d ? fmtDate(d) : "";
+};
+const asGender = s => /\b(male|lelaki|m)\b/i.test(firstCell(s)) && !/female/i.test(firstCell(s)) ? "Male" : /\b(female|perempuan|f)\b/i.test(firstCell(s)) ? "Female" : "";
+const asStatus = s => { const v = firstCell(s);
+  return /married|berkahwin/i.test(v) ? "Married" : /single|bujang/i.test(v) ? "Single" : /divorc|bercerai/i.test(v) ? "Divorced" : /widow|balu|duda/i.test(v) ? "Widowed" : ""; };
+
+// address cells of a line (GE prints the address in two columns, with "ADDRESS" as a label cell)
+const addrCells = s => s.split("  ").map(x => x.replace(/^[\s:.\-|]+/, "").trim())
+  .filter(x => x && !/^(address|alamat)$/i.test(x) && !anyLabel(x) && !/[a-z]{4,}/.test(x));
+function addressFrom(lines, i, firstParts) {
+  const parts = [...firstParts];
+  for (let j = i + 1; j < Math.min(lines.length, i + 7) && !parts.some(p => POSTCODE_RE.test(p)); j++) {
+    if (anyLabel(lines[j]) && !/^(address|alamat)\b/i.test(lines[j].trim())) break;
+    parts.push(...addrCells(lines[j]));
+  }
+  const k = parts.findIndex(p => POSTCODE_RE.test(p));
+  return k < 0 ? null : parseAddress(parts, k);
+}
+function captureAddress(lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(LABELS.address);
+    if (!m || /e-?mail/i.test(lines[i].slice(Math.max(0, m.index - 8), m.index + m[0].length))) continue;
+    if (/[a-z]{4,}/.test(lines[i]) && !/^\s*:/.test(lines[i].slice(m.index + m[0].length))) continue;  // a sentence, not a label
+    const a = addressFrom(lines, i, addrCells(lines[i].slice(m.index + m[0].length)));
+    if (a) return a;
+  }
+  // unlabelled fallback: the lines under the addressee of a cover letter
+  const n = titledName(lines);
+  return n ? addressFrom(lines, n.i, []) : null;
+}
+function parseAddress(parts, k) {
+  const pcLine = parts[k], pc = pcLine.match(POSTCODE_RE);
+  const before = pcLine.slice(0, pc.index).replace(/[,\s]+$/, "");
+  const town = pcLine.slice(pc.index + 5).replace(STATES, "").replace(/[^A-Za-z .'\-]/g, " ").replace(/\s+/g, " ").trim();
+  const rows = [...parts.slice(0, k), before].map(s => s.replace(/[,\s]+$/, "").trim()).filter(Boolean);
+  while (rows.length > 3) rows.splice(rows.length - 2, 2, rows[rows.length - 2] + ", " + rows[rows.length - 1]);
+  const up = s => (s || "").toUpperCase();
+  return {address1: up(rows[0]), address2: up(rows[1]), address3: up(rows[2]), postcode: pc[1], town: up(town), country: "MALAYSIA"};
+}
+function captureNominees(lines) {
+  const start = lines.findIndex(l => LABELS.nominee.test(l));
+  if (start < 0) return [];
+  const out = [];
+  for (let i = start; i < Math.min(lines.length, start + 40); i++) {
+    const l = lines[i], ic = asIc(l), pct = l.match(/\b(\d{1,3}(?:\.\d{1,2})?)\s*%/);
+    if (!ic || !pct) continue;
+    const rel = (REL_WORDS.find(([re]) => re.test(l)) || [])[1] || "";
+    const name = asName(l.slice(0, l.search(IC_RE))) || asName(lines[i - 1] || "");
+    out.push({name, nric: ic, share: pct[1], relationship: rel});
+  }
+  return out.slice(0, 4);
+}
+// unlabelled fallback: the addressee line of a cover letter, e.g. "MISS TAN MEI LING"
+function titledName(lines) {
+  const i = lines.findIndex(l => TITLES.test(l.trim()) && asName(l));
+  return i < 0 ? null : {v: asName(lines[i]), i};
+}
+function extractPolicy(lines) {
+  const f = {};
+  const set = (k, r) => { if (r) f[k] = r.v; return r; };
+  set("policy_no", after(lines, LABELS.policy_no, asPolicy));
+  set("proposal_no", after(lines, LABELS.proposal_no, asPolicy));
+  // unlabelled fallback: the addressee line of the cover letter, e.g. "MISS TAN MEI LING"
+  const own = set("name", after(lines, LABELS.owner, asName) || titledName(lines));
+  // NRIC: the one nearest after the policyowner label, else the first in the document
+  const icFrom = own ? own.i : 0;
+  const icLine = from => { const i = lines.findIndex((l, k) => k >= from && IC_RE.test(l)); return i < 0 ? null : {v: asIc(lines[i]), i}; };
+  set("nric", (own && icLine(own.i) && icLine(own.i).i <= own.i + 2 ? icLine(own.i) : null)
+    || after(lines, LABELS.nric, asIc, icFrom) || icLine(icFrom) || icLine(0));
+  set("dob", after(lines, LABELS.dob, asDate, icFrom) || after(lines, LABELS.dob, asDate));
+  set("gender", after(lines, LABELS.gender, asGender, icFrom) || after(lines, LABELS.gender, asGender));
+  const rel = after(lines, LABELS.religion, s => firstCell(s));
+  if (rel) f.muslim = /islam|muslim/i.test(rel.v) ? "Yes" : "No";
+  set("status", after(lines, LABELS.status, asStatus));
+  const la = after(lines, LABELS.assured, asName);
+  return {f, assured: la ? la.v : "", address: captureAddress(lines), nominees: captureNominees(lines)};
+}
+
+const CAPTURE_FIELDS = [["policy_no", "POLICY", "Policy No 保单号"], ["proposal_no", "POLICY", "Proposal No"],
+  ["name", "POLICYOWNER", "保单持有人姓名"], ["nric", "POLICYOWNER", "保单持有人 NRIC"], ["dob", "POLICYOWNER", "出生日期"],
+  ["gender", "POLICYOWNER", "性别"], ["muslim", "POLICYOWNER", "回教徒？"], ["status", "POLICYOWNER", "婚姻状况"]];
+const ADDR_KEYS = ADDRESS.map(a => a[0]);
+let pending = null;  // capture waiting for review
+
+function applyCapture(c, cap, opts) {
+  const d = c.data;
+  for (const [k, sec] of CAPTURE_FIELDS) if (opts.fields[k]) d[sec][k] = opts.fields[k];
+  if (opts.address) c.policyAddress = opts.address;
+  if (opts.nominees && opts.nominees.length) d.NOMINEES = opts.nominees.map(n => ({nationality: "Malaysian", ...n}));
+  if (opts.addrToNominee1 && c.policyAddress) {
+    if (!d.NOMINEES.length) d.NOMINEES.push({nationality: "Malaysian"});
+    Object.assign(d.NOMINEES[0], c.policyAddress);
+  }
+  c.source = "保单 " + cap.file;
+}
+function newCustomer(source) {
+  return {id: uid(), source, created: new Date().toISOString(), data: {
+    POLICY: {}, POLICYOWNER: {muslim: "No", status: "Married", has_children: "Yes"},
+    NOMINEES: [{nationality: "Malaysian"}], TRUSTEES: [], WITNESS: {is_agent: "Yes"}}};
+}
+async function importPolicies(files) {
+  const caps = [];
+  for (const file of files) {
+    try {
+      busy(`读取保单… ${file.name}`);
+      const {lines, ocr: usedOcr} = await documentLines(file);
+      caps.push({file: file.name, lines, ocr: usedOcr, ...extractPolicy(lines)});
+    } catch (e) { caps.push({file: file.name, error: e.message}); }
+  }
+  busy();
+  if (caps.length === 1 && !caps[0].error) return reviewCapture(caps[0]);
+  // several policies: one new client each, with everything that was found
+  const log = [];
+  for (const cap of caps) {
+    if (cap.error) { log.push(`✗ ${cap.file}: ${cap.error}`); continue; }
+    const c = newCustomer("");
+    const fields = {...cap.f};
+    if (fields.policy_no) delete fields.proposal_no;
+    applyCapture(c, cap, {fields, address: cap.address});
+    customers.push(c); selId = c.id;
+    const got = CAPTURE_FIELDS.filter(([k]) => cap.f[k]).map(f => f[2]);
+    log.push(`✓ ${cap.file}: ${cap.f.name || "（姓名没抓到）"} - 抓到 ${got.length ? got.join("、") : "无"}${cap.address ? "、地址" : ""}${cap.ocr ? "（文字识别，请仔细核对）" : ""}`);
+  }
+  log.push("", "请逐位打开核对资料，再补上受益人 / 受托人。");
+  save(); renderAll(); setTab("list");
+  $("importLog").textContent = log.join("\n");
+  openModal("mImport");
+}
+function reviewCapture(cap) {
+  pending = cap;
+  $("polTitle").textContent = `从保单抓到的资料：${cap.file}`;
+  const found = CAPTURE_FIELDS.filter(([k]) => cap.f[k]).length;
+  $("polNote").textContent = (found ? `抓到 ${found} 项，请对照保单核对后按「套用」。` : "没有抓到资料 - 可能是格式不同。请从下面的保单原文复制，或手动填写。")
+    + (cap.ocr ? " ⚠ 这是扫描件/图片，文字识别可能有错字，务必逐字核对。" : "")
+    + (cap.assured && cap.assured !== cap.f.name ? ` 受保人 Life assured：${cap.assured}（与持有人不同，表格填的是持有人）` : "");
+  const row = (key, label, v, ok = true) => `<tr class="${v ? "" : "miss"}"><td><input type="checkbox" data-k="${key}" ${v && ok ? "checked" : ""}></td>
+    <td>${esc(label)}</td><td><input type="text" data-v="${key}" value="${esc(v || "")}" placeholder="没抓到"></td></tr>`;
+  // Proposal No is only for new proposals - not needed once the policy number exists
+  let h = CAPTURE_FIELDS.map(([k, , label]) => row(k, label, cap.f[k], !(k === "proposal_no" && cap.f.policy_no))).join("");
+  const a = cap.address || {};
+  h += ADDRESS.map(([k, , zh]) => row("addr_" + k, "持有人" + zh, a[k] || (k === "country" && cap.address ? "MALAYSIA" : ""))).join("");
+  $("polRows").innerHTML = h;
+  $("polNoms").innerHTML = cap.nominees.length ? `<label class="chk"><input type="checkbox" id="polUseNoms"> 用保单上现有的 ${cap.nominees.length} 位受益人：
+    ${cap.nominees.map(n => esc(`${n.name || "?"} ${n.share}%`)).join("，")}</label>` : "";
+  $("polAddrNom").checked = false;
+  const c = cur();
+  $("polTarget").innerHTML = `<option value="new">新建保客</option>` + (c ? `<option value="cur">目前打开的：${esc(displayName(c))}</option>` : "");
+  $("polRaw").textContent = cap.lines.join("\n");
+  openModal("mPolicy");
+}
+function confirmCapture() {
+  const cap = pending, val = k => upper(document.querySelector(`[data-v="${k}"]`).value),
+    on = k => document.querySelector(`[data-k="${k}"]`).checked;
+  const fields = {};
+  for (const [k] of CAPTURE_FIELDS) if (on(k) && val(k)) fields[k] = ["gender", "muslim", "status"].includes(k) ? title(val(k)) : val(k);
+  let address = null;
+  if (ADDR_KEYS.some(k => on("addr_" + k) && val("addr_" + k)))
+    address = Object.fromEntries(ADDR_KEYS.map(k => [k, on("addr_" + k) ? val("addr_" + k) : ""]));
+  let c = $("polTarget").value === "cur" ? cur() : null;
+  if (!c) { c = newCustomer(""); customers.push(c); }
+  applyCapture(c, cap, {fields, address, addrToNominee1: $("polAddrNom").checked,
+    nominees: $("polUseNoms")?.checked ? cap.nominees : null});
+  selId = c.id; save();
+  $("mPolicy").classList.remove("open");
+  renderAll(); setTab("edit");
+  toast("已套用。请补上受益人资料，核对后可预览 / 打印。");
+}
+
+// ------------------------------------------------------------------ UI
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = "none", 4500);
+}
+function openModal(id) { $(id).classList.add("open"); }
+document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => {
+  if (e.target === m || e.target.hasAttribute("data-close")) m.classList.remove("open");
+}));
+const displayName = c => upper(c.data.POLICYOWNER.name) || "（未填姓名）";
+
+function renderList() {
+  const q = query.toLowerCase();
+  const rows = customers.map(c => ({c, chk: checkOf(c)})).filter(({c, chk}) => {
+    if (filter === "ok" && chk.errors) return false;
+    if (filter === "err" && !chk.errors) return false;
+    if (!q) return true;
+    const hay = [c.data.POLICYOWNER.name, c.data.POLICYOWNER.nric, c.data.POLICY.policy_no, c.data.POLICY.proposal_no].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  $("count").textContent = `${rows.length} / ${customers.length} 位保客`;
+  $("list").innerHTML = rows.map(({c, chk}) => `
+    <div class="item ${c.id === selId ? "sel" : ""}" data-id="${c.id}">
+      <div class="n">${esc(displayName(c))}</div>
+      <div class="m">${esc(c.data.POLICY.policy_no || c.data.POLICY.proposal_no || "无保单号")}
+        ${chk.errors ? `<span class="badge b-err">${chk.errors} 错误</span>` : `<span class="badge b-ok">✓ 可导出</span>`}
+        ${chk.warnings ? `<span class="badge b-warn">${chk.warnings} 提醒</span>` : ""}</div>
+    </div>`).join("") || `<div class="count">没有符合的保客</div>`;
+}
+
+const LEVEL_ZH = {ERROR: "错误 · 必须修改", WARNING: "提醒 · 导出前核对", INFO: "备注 · 可向客户解释"};
+const MANUAL = ["保单持有人签 Part 1（第 3 页）；有受托人时也签 Part 2（第 4 页）",
+  "见证人签名；签名日期在签名当天手写", "受托人在第 4 页签名接受委任",
+  "Part 3（第 5 页）如需要，手写完成", "与每位受益人/受托人确认资料（表格的个人资料声明）"];
+function renderChecks() {
+  const c = cur();
+  if (!c) { $("checks").innerHTML = ""; return; }
+  const chk = checkOf(c);
+  updateTabDot();
+  let h = `<h3>检查结果 · ${esc(displayName(c))}</h3>`;
+  if (!chk.errors) h += `<div class="ok-box">✓ 没有错误，可以预览 / 导出 PDF</div>`;
+  for (const lv of ["ERROR", "WARNING", "INFO"]) {
+    const its = chk.items.filter(i => i[0] === lv);
+    if (its.length) h += its.map(([, w, m]) => `<div class="ck ${lv}"><b>${LEVEL_ZH[lv]} · ${esc(w)}</b>${esc(m)}</div>`).join("");
+  }
+  h += `<h3 style="margin-top:16px">保持手写（故意不填）</h3><ul class="manual">${MANUAL.map(m => `<li>${m}</li>`).join("")}</ul>`;
+  $("checks").innerHTML = h;
+}
+
+function fieldHtml(path, f, value, extra = "") {
+  const [key, , zh, choices] = f;
+  const id = "f_" + path.replace(/\./g, "_");
+  const input = choices
+    ? `<select id="${id}" data-path="${path}"><option value=""></option>${choices.map(o => `<option ${canon(value, choices) === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`
+    : `<input id="${id}" data-path="${path}" value="${esc(value)}" ${/date|expiry|dob/.test(key) ? 'placeholder="DD/MM/YYYY"' : ""}>`;
+  const wide = ["name", "address1", "address2", "address3"].includes(key) ? " wide" : "";
+  return `<div class="f${wide}"><label for="${id}">${esc(zh)}</label>${input}${key === "nric" ? `<div class="hint" data-hint="${path}">${esc(icHint(value))}</div>` : ""}${extra}</div>`;
+}
+function icHint(v) {
+  const [k, n] = idInfo(v);
+  if (k === "nric") { const d = nricDob(n, today); return d ? `IC：${fmtDate(d)} · ${nricGender(n)} · ${age(d, today)} 岁` : "IC 前 6 位不是有效日期"; }
+  if (k === "passport") return "护照 - 请填到期日";
+  return "";
+}
+const fieldsOf = sec => SEC[sec][3];
+const WITNESS_AGENT_ONLY = ["is_agent", "name", "iac"];
+
+function renderEditor() {
+  const c = cur(), ed = $("editor");
+  if (!c) {
+    ed.innerHTML = `<div class="empty"><h2>还没有保客</h2><p>按 <b>📄 上传保单</b>（PDF / 照片）自动抓保单号、持有人姓名、IC 和地址；或按 <b>＋ 新增保客</b> 逐个输入，或 <b>⇪ 批量上传</b> Excel / CSV（先 <b>下载批量模板</b>，每行一位保客）。</p>
+      <p>旧的 Excel 资料表（inputs 文件夹里的 .xlsx）也可以直接上传。</p></div>`;
+    return;
+  }
+  const d = c.data;
+  const chk = checkOf(c);
+  const sumShare = d.NOMINEES.reduce((s, n) => s + (parseFloat(clean(n.share)) || 0), 0);
+  let h = `<div class="bar"><h2>${esc(displayName(c))}</h2>
+    <button class="btn" data-act="preview" ${chk.errors ? "disabled" : ""}>预览 PDF</button>
+    <button class="btn pr" data-act="print" ${chk.errors ? "disabled" : ""}>🖨 打印</button>
+    <button class="btn primary" data-act="export" ${chk.errors ? "disabled" : ""}>导出 PDF</button>
+    <button class="btn" data-act="dup">复制</button>
+    <button class="btn danger" data-act="del">删除</button></div>`;
+  h += `<div class="card"><h3>保单 Policy</h3><div class="grid">${fieldsOf("POLICY").map(f => fieldHtml(`POLICY.${f[0]}`, f, d.POLICY[f[0]])).join("")}</div></div>`;
+  h += `<div class="card"><h3>保单持有人 Policyowner（第 1 页）</h3><div class="grid">${fieldsOf("POLICYOWNER").map(f => fieldHtml(`POLICYOWNER.${f[0]}`, f, d.POLICYOWNER[f[0]])).join("")}</div></div>`;
+  h += `<div class="card"><h3>受益人 Nominees（最多 4 位）<span class="sp">
+      <span class="total ${Math.round(sumShare * 100) === 10000 ? "ok" : "bad"}" id="shareTotal">合计 ${+sumShare.toFixed(2)}%</span>
+      <button class="btn small" data-act="split">平均分配</button>
+      <button class="btn small" data-act="addNom" ${d.NOMINEES.length >= 4 ? "disabled" : ""}>＋ 受益人</button></span></h3>`;
+  d.NOMINEES.forEach((n, i) => {
+    h += `<div class="card" style="background:#fff"><h3>受益人 ${i + 1}<span class="sp">
+      ${c.policyAddress ? `<button class="btn small" data-act="ownerAddr" data-sec="NOMINEES" data-i="${i}">地址同保单持有人</button>` : ""}
+      ${i ? `<button class="btn small" data-act="sameAddr" data-sec="NOMINEES" data-i="${i}">地址同受益人 1</button>` : ""}
+      <button class="btn small danger" data-act="rm" data-sec="NOMINEES" data-i="${i}">移除</button></span></h3>
+      <div class="grid">${fieldsOf("NOMINEES").map(f => fieldHtml(`NOMINEES.${i}.${f[0]}`, f, n[f[0]])).join("")}</div></div>`;
+  });
+  if (!d.NOMINEES.length) h += `<p class="count">还没有受益人，按「＋ 受益人」。</p>`;
+  h += `</div>`;
+  h += `<div class="card"><h3>受托人 Trustees（Part 2，最多 2 位）<span class="sp">
+      <button class="btn small" data-act="addTr" ${d.TRUSTEES.length >= 2 ? "disabled" : ""}>＋ 受托人</button></span></h3>`;
+  d.TRUSTEES.forEach((t, i) => {
+    h += `<div class="card" style="background:#fff"><h3>受托人 ${i + 1}<span class="sp">
+      ${d.NOMINEES.length ? `<button class="btn small" data-act="sameAddr" data-sec="TRUSTEES" data-i="${i}">地址同受益人 1</button>` : ""}
+      <button class="btn small danger" data-act="rm" data-sec="TRUSTEES" data-i="${i}">移除</button></span></h3>
+      <div class="grid">${fieldsOf("TRUSTEES").map(f => fieldHtml(`TRUSTEES.${i}.${f[0]}`, f, t[f[0]])).join("")}</div></div>`;
+  });
+  if (!d.TRUSTEES.length) h += `<p class="count">不委任受托人（回教徒保单持有人不可委任，见表格 note 4a）。</p>`;
+  h += `</div>`;
+  const agent = (canon(d.WITNESS.is_agent, YES_NO) || "Yes") === "Yes";
+  h += `<div class="card"><h3>见证人 Witness</h3><div class="grid">${fieldsOf("WITNESS")
+    .filter(f => !agent || WITNESS_AGENT_ONLY.includes(f[0])).filter(f => agent || f[0] !== "iac")
+    .map(f => fieldHtml(`WITNESS.${f[0]}`, f, f[0] === "is_agent" ? (d.WITNESS.is_agent || "Yes") : d.WITNESS[f[0]])).join("")}</div>
+    ${agent ? `<p class="count">空白＝用 ⚙ 设定里的 ${esc(settings.agent_name)} / IAC ${esc(settings.agent_iac || "（手写）")}</p>` : ""}</div>`;
+  h += `<p class="count">来源：${esc(c.source || "手动输入")}</p>`;
+  ed.innerHTML = h;
+}
+function renderAll() { renderList(); renderEditor(); renderChecks(); }
+
+// phone layout: one screen at a time
+function setTab(t) {
+  document.body.dataset.tab = t;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  window.scrollTo(0, 0);
+}
+function updateTabDot() {
+  const c = cur(), n = c ? checkOf(c).errors : 0, dot = $("tabDot");
+  dot.hidden = !n; dot.textContent = n;
+}
+const fitHeader = () => document.documentElement.style.setProperty("--hh", document.querySelector("header").offsetHeight + "px");
+window.addEventListener("resize", fitHeader);
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
+
+let tmr = null;
+function onEdit(e) {
+  const el = e.target, path = el.dataset.path, c = cur();
+  if (!path || !c) return;
+  const parts = path.split(".");
+  if (parts.length === 3) c.data[parts[0]][+parts[1]][parts[2]] = el.value;
+  else c.data[parts[0]][parts[1]] = el.value;
+  c.updated = new Date().toISOString();
+  if (parts[parts.length - 1] === "nric") { const hEl = document.querySelector(`[data-hint="${path}"]`); if (hEl) hEl.textContent = icHint(el.value); }
+  if (path === "WITNESS.is_agent") { save(); renderAll(); return; }
+  if (parts[2] === "share") {
+    const s = c.data.NOMINEES.reduce((a, n) => a + (parseFloat(clean(n.share)) || 0), 0);
+    const t = $("shareTotal"); t.textContent = `合计 ${+s.toFixed(2)}%`; t.className = "total " + (Math.round(s * 100) === 10000 ? "ok" : "bad");
+  }
+  clearTimeout(tmr);
+  tmr = setTimeout(() => {
+    save(); renderList(); renderChecks();
+    const chk = checkOf(c);
+    document.querySelectorAll('[data-act="preview"],[data-act="export"]').forEach(b => b.disabled = !!chk.errors);
+    document.querySelector(".bar h2").textContent = displayName(c);
+  }, 250);
+}
+$("editor").addEventListener("input", onEdit);
+$("editor").addEventListener("change", onEdit);
+$("editor").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"), c = cur();
+  if (!b || !c) return;
+  const d = c.data, act = b.dataset.act, i = +b.dataset.i;
+  if (act === "preview") return preview(c);
+  if (act === "export") return exportOne(c);
+  if (act === "print") return printOne(c);
+  if (act === "ownerAddr" && c.policyAddress) Object.assign(d[b.dataset.sec][i], c.policyAddress);
+  if (act === "del") {
+    ask("删除保客", `删除 ${displayName(c)} 的资料？`, {ok: "删除"}).then(yes => {
+      if (!yes) return;
+      const k = customers.indexOf(c); customers.splice(k, 1);
+      selId = (customers[k] || customers[k - 1] || {}).id || null;
+      save(); renderAll(); setTab("list");
+    });
+    return;
+  }
+  if (act === "dup") {
+    const copy = {id: uid(), data: JSON.parse(JSON.stringify(d)), source: "复制自 " + displayName(c), created: new Date().toISOString()};
+    customers.splice(customers.indexOf(c) + 1, 0, copy); selId = copy.id;
+  }
+  if (act === "addNom") d.NOMINEES.push({nationality: "Malaysian"});
+  if (act === "addTr") d.TRUSTEES.push({nationality: "Malaysian", country_of_birth: "Malaysian"});
+  if (act === "rm") d[b.dataset.sec].splice(i, 1);
+  if (act === "sameAddr" && d.NOMINEES[0]) for (const [k] of ADDRESS) d[b.dataset.sec][i][k] = d.NOMINEES[0][k] || "";
+  if (act === "split" && d.NOMINEES.length) {
+    const n = d.NOMINEES.length, base = Math.floor(10000 / n) / 100;
+    d.NOMINEES.forEach((x, j) => x.share = String(j === n - 1 ? +(100 - base * (n - 1)).toFixed(2) : base));
+  }
+  save(); renderAll();
+});
+$("list").addEventListener("click", e => {
+  const it = e.target.closest(".item");
+  if (it) { selId = it.dataset.id; renderAll(); setTab("edit"); }
+});
+$("list").addEventListener("dblclick", e => { const it = e.target.closest(".item"); if (it && cur()) preview(cur()); });
+$("q").addEventListener("input", e => { query = e.target.value; renderList(); });
+$("filters").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  filter = b.dataset.f;
+  document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("on", x === b));
+  renderList();
+});
+$("bNew").onclick = () => {
+  const c = {id: uid(), source: "手动输入", created: new Date().toISOString(), data: {
+    POLICY: {}, POLICYOWNER: {muslim: "No", status: "Married", has_children: "Yes"},
+    NOMINEES: [{nationality: "Malaysian"}], TRUSTEES: [], WITNESS: {is_agent: "Yes"}}};
+  customers.push(c); selId = c.id; save(); filter = "all"; renderAll(); setTab("edit");
+  $("f_POLICY_policy_no")?.focus();
+};
+$("bUpload").onclick = () => $("file").click();
+$("file").onchange = e => { const fs = [...e.target.files]; e.target.value = ""; if (fs.length) importFiles(fs); };
+$("bTemplate").onclick = downloadTemplate;
+$("bPolicy").onclick = () => $("policyFile").click();
+$("policyFile").onchange = e => { const fs = [...e.target.files]; e.target.value = ""; if (fs.length) importPolicies(fs); };
+$("polApply").onclick = confirmCapture;
+$("bPrintAll").onclick = printAll;
+$("pvPrint").onclick = () => { const c = cur(); $("mPreview").classList.remove("open"); if (c) printOne(c); };
+$("pvDownload").onclick = () => { const c = cur(); if (c) exportOne(c); };
+$("bZip").onclick = exportZip;
+$("bExportData").onclick = exportData;
+$("bSettings").onclick = () => { $("sName").value = settings.agent_name; $("sIac").value = settings.agent_iac; openModal("mSettings"); };
+$("bSaveSettings").onclick = () => {
+  settings = {agent_name: upper($("sName").value), agent_iac: upper($("sIac").value)};
+  store.set("nff_settings", settings); $("mSettings").classList.remove("open"); renderAll(); toast("设定已保存");
+};
+$("bClear").onclick = () => {
+  $("mSettings").classList.remove("open");
+  ask("清除全部资料", "清除这个浏览器里的全部保客资料？\n建议先「导出资料 Excel」备份。", {ok: "全部清除"}).then(yes => {
+    if (yes) { customers = []; selId = null; save(); renderAll(); }
+  });
+};
+// drag & drop files anywhere
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => {
+  e.preventDefault();
+  const all = [...e.dataTransfer.files];
+  const sheets = all.filter(f => /\.(xlsx|xls|csv)$/i.test(f.name)), policies = all.filter(f => /\.(pdf|jpe?g|png)$/i.test(f.name));
+  if (sheets.length) importFiles(sheets);
+  else if (policies.length) importPolicies(policies);
+});
+// a hosted page cannot open the print dialog: save the PDF, then print it from the phone
+if (HOSTED) { document.body.classList.add("hosted"); $("pvDownload").textContent = "保存 PDF 去打印"; }
+renderAll();
+setTab(customers.length ? "list" : "edit");
+fitHeader();
+</script>
+</body>
+</html>

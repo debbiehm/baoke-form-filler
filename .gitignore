@@ -1,0 +1,15 @@
+# Only the web app is published. Everything else in this folder stays on this computer:
+# client sheets, drafts, final PDFs, logs, config (agent IAC) and the other desktop tools.
+/*
+!/.gitignore
+!/README.md
+!/index.html
+!/保客填表.html
+!/layout.py
+!/boxes.py
+!/form/
+/form/*
+!/form/NBZ-FNOMI-V07-082025.pdf
+!/web/
+/web/dist/
+__pycache__/
