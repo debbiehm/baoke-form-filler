@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="保客填表">
 <title>保客填表</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
 :root{
   --bg:#F6F1E7; --card:#FFFDF8; --ink:#1E2A24; --muted:#6B746E; --line:#E3DCCD;
@@ -148,6 +151,7 @@ header .btns{display:contents}
   <button class="btn pr" id="bPrintAll">🖨 打印全部</button>
   <button class="btn" id="bExportData">导出资料 Excel</button>
   <button class="btn" id="bSettings">⚙ 设定</button>
+  <button class="btn light" id="bInstall" hidden>📲 安装到手机</button>
   </div>
   <input type="file" id="file" accept=".xlsx,.xls,.csv" multiple hidden>
   <input type="file" id="policyFile" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" multiple hidden>
@@ -1550,6 +1554,19 @@ document.addEventListener("drop", e => {
   if (sheets.length) importFiles(sheets);
   else if (policies.length) importPolicies(policies);
 });
+// installable app (GitHub Pages only): offline copy + "add to home screen" with the app icon
+const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+if (!HOSTED && location.protocol === "https:" && "serviceWorker" in navigator)
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+let installEvent = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; $("bInstall").hidden = false; fitHeader(); });
+window.addEventListener("appinstalled", () => { $("bInstall").hidden = true; toast("已安装，可以从手机桌面的「保客填表」图标打开"); });
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (!HOSTED && !standalone && isIos && location.protocol === "https:") $("bInstall").hidden = false;
+$("bInstall").onclick = async () => {
+  if (installEvent) { installEvent.prompt(); await installEvent.userChoice; installEvent = null; $("bInstall").hidden = true; return; }
+  ask("安装到 iPhone", "请用 Safari 打开这个网页：\n1. 点下方的「分享」按钮（方框加箭头）\n2. 选「加入主画面 / Add to Home Screen」\n3. 按「加入」\n\n桌面就会出现「保客填表」图标。", {ok: "知道了"});
+};
 // a hosted page cannot open the print dialog: save the PDF, then print it from the phone
 if (HOSTED) { document.body.classList.add("hosted"); $("pvDownload").textContent = "保存 PDF 去打印"; }
 renderAll();

@@ -48,7 +48,13 @@ def main():
                 .replace("/*__STRIPS__*/null", js(strips))
                 .replace("/*__FORM_B64__*/", base64.b64encode(FORM.read_bytes()).decode()))
     OUT.write_text(html, encoding="utf-8")
-    PAGES.write_text(html, encoding="utf-8")  # same app, served by GitHub Pages
+    # same app, served by GitHub Pages as an installable app (manifest.webmanifest, sw.js, icons/)
+    head = "<title>保客填表</title>"
+    assert html.count(head) == 1
+    PAGES.write_text(html.replace(head, head + "\n" + "\n".join((
+        '<link rel="manifest" href="manifest.webmanifest">',
+        '<link rel="icon" type="image/png" href="icons/favicon.png">',
+        '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">'))), encoding="utf-8")
     print(f"Built {OUT} + {PAGES.name} ({OUT.stat().st_size / 1e6:.1f} MB)")
     # phone link version (claude.ai artifact): the host adds doctype/html/head/body itself
     body = html

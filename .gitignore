@@ -13,3 +13,6 @@
 !/web/
 /web/dist/
 __pycache__/
+!/manifest.webmanifest
+!/sw.js
+!/icons/
