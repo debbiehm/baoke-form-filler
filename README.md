@@ -3,7 +3,7 @@
 A single-page web app that fills Great Eastern's **Appointment / Change of Nominee(s) / Trustee(s)** form
 (NBZ-FNOMI-V07-082025) and checks it against the form's own notes before you print.
 
-**Open it:** https://&lt;your-github-username&gt;.github.io/&lt;repo&gt;/ on a phone or computer, or download `index.html` and open it in Chrome / Edge.
+**Open it:** https://debbiehm.github.io/baoke-form-filler/ on a phone or computer, or download `index.html` and open it in Chrome / Edge.
 
 ## What it does
 
